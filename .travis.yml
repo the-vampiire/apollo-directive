@@ -1,0 +1,12 @@
+sudo: true
+cache: npm
+language: node_js
+node_js: "10.15.3"
+before_install:
+  - npm i
+jobs:
+  include:
+    - stage: test
+      script:
+        - npm run lint
+        - npm run test:travis

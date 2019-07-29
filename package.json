@@ -1,0 +1,78 @@
+{
+  "name": "apollo-directives",
+  "version": "0.0.1",
+  "description": "tools for simplifying the process of implementing schema directive resolvers with Apollo Server",
+  "main": "src/index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "jest",
+    "lint": "eslint .",
+    "test:travis": "npm run test -- --no-cache --coverage && cat ./coverage/lcov.info | coveralls"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/the-vampiire/apollo-directives.git"
+  },
+  "keywords": [
+    "apollo",
+    "directives",
+    "graphql",
+    "server",
+    "schema"
+  ],
+  "author": "the-vampiire",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/the-vampiire/apollo-directives/issues"
+  },
+  "homepage": "https://github.com/the-vampiire/apollo-directives#readme",
+  "dependencies": {
+    "graphql": "^14.4.2",
+    "graphql-tools": "^4.0.5"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.15",
+    "coveralls": "^3.0.5",
+    "eslint": "^5.6.0",
+    "eslint-config-airbnb-base": "^13.2.0",
+    "eslint-config-prettier": "^6.0.0",
+    "eslint-plugin-import": "^2.18.2",
+    "eslint-plugin-jest": "^22.14.0",
+    "jest": "^24.8.0"
+  },
+  "eslintConfig": {
+    "env": {
+      "es6": true,
+      "commonjs": true,
+      "jest/globals": true
+    },
+    "extends": [
+      "prettier",
+      "airbnb-base",
+      "plugin:jest/recommended"
+    ],
+    "plugins": [
+      "jest",
+      "import"
+    ],
+    "globals": {
+      "Atomics": "readonly",
+      "SharedArrayBuffer": "readonly"
+    },
+    "parserOptions": {
+      "ecmaVersion": 2018
+    },
+    "rules": {
+      "quotes": [
+        "error",
+        "double"
+      ],
+      "max-len": [
+        0,
+        100
+      ]
+    }
+  }
+}
