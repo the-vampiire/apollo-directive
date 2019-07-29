@@ -1,21 +1,25 @@
 /**
  * @typedef {Object} DirectiveConfig
  * @property {Hooks} [hooks]
- * @property {string} name
- * @property {replaceResolverSignature} resolverReplacer
+ * @property {string} name the name of the directive (must match directive type definition)
+ * @property {resolverReplacerSignature} resolverReplacer
  */
 
 /**
  * @typedef {Object} DirectiveContext
- * @property {ObjectType} objectType
- * @property {ObjectTypeField} field
+ * @description additional context related to the directive implementation
+ * @property {ObjectType} objectType Object Type the directive is applied to
+ * @property {ObjectTypeField} field Object Type Field the directive is applied to
+ * @property {string} name directive name
+ * @property {Object} args directive arguments
  */
 
 /**
  * @typedef {Object} Hooks
- * @property {visitObjectHookSignature} [onVisitObject]
- * @property {visitObjectHookSignature} [onApplyDirective]
- * @property {visitFieldHookSignature} [onVisitFieldDefinition]
+ * @description optional hooks fired during directive registration on server startup
+ * @property {hookSignature} [onVisitObject] fired just before an Object Type directive registration
+ * @property {hookSignature} [onApplyDirective] fired as the directive is being applied
+ * @property {hookSignature} [onVisitFieldDefinition] fired just before an Object Type Field directive registration
  */
 
 /**
@@ -31,23 +35,16 @@
  */
 
 /**
- * @typedef {function} replaceResolverSignature
- * @param {resolverSignature} originalResolver
+ * @typedef {function} resolverReplacerSignature
+ * @description a higher order function that bridges directive registration with your resolverWrapper function
+ * @param {resolverSignature} originalResolver the field's original resolver function
  * @param {DirectiveContext} directiveContext
  * @returns {resolverWrapperSignature} resolverWrapper function
  */
 
 /**
- * @typedef {function} visitObjectHookSignature
- * @param {ObjectType} objectType
+ * @typedef {function} hookSignature
+ * @param {DirectiveContext} directiveContext
  * @returns {void}
  */
-
-/**
- * @typedef {function} visitFieldHookSignature
- * @param {ObjectTypeField} field
- * @param {{ objectType: ObjectType }} details
- * @returns {void}
- */
-
 module.exports = {};
