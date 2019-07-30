@@ -31,15 +31,15 @@ const markDirectiveApplied = (directiveTarget, directiveName) => {
 };
 
 const shouldApplyToField = (
-  directiveTarget,
+  field,
   directiveName,
   fromApplyToObject = false,
 ) => {
-  if (!directiveTarget._appliedDirectives) {
-    directiveTarget._appliedDirectives = {};
+  if (!field._appliedDirectives) {
+    field._appliedDirectives = {};
   }
 
-  const directiveAlreadyApplied = directiveTarget._appliedDirectives[directiveName];
+  const directiveAlreadyApplied = field._appliedDirectives[directiveName];
 
   // if the directive is being applied from applyToObject and it has already been applied
   if (fromApplyToObject && directiveAlreadyApplied) {
