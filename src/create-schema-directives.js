@@ -13,7 +13,7 @@ const createDirective = require("./create-directive");
 const createSchemaDirectives = config => config.directiveConfigs.reduce(
   (schemaDirectives, directiveConfig) => ({
     ...schemaDirectives,
-    [directiveConfig.directiveKey]: createDirective(directiveConfig),
+    [directiveConfig.name]: createDirective(directiveConfig),
   }),
   {},
 );

@@ -1,30 +1,31 @@
-this library aims to resolve this quote, and commonly shared opinion, from the [Schema Directives docs](https://www.apollographql.com/docs/graphql-tools/schema-directives/#using-schema-directives):
+[![Build Status](https://travis-ci.org/the-vampiire/apollo-directive.svg?branch=master)](https://travis-ci.org/the-vampiire/apollo-directive) [![Coverage Status](https://coveralls.io/repos/github/the-vampiire/apollo-directive/badge.svg)](https://coveralls.io/github/the-vampiire/apollo-directive)
+
+This library aims to resolve this quote, and commonly shared opinion, from the [Schema Directives docs](https://www.apollographql.com/docs/graphql-tools/schema-directives/#using-schema-directives):
 
 > ...some of the examples may seem quite complicated. No matter how many tools and best practices you have at your disposal, it can be difficult to implement a non-trivial schema directive in a reliable, reusable way.
 
 # concept
 
-implementing a directive used to be a very tedious and confusing process. with the help of the `graphql-tools` `SchemaVisitor` class a big leap in the direction of usability was made. yet even with this class available directives were still difficult enough to implement that most authors opted for alternatives like higher order function resolver wrappers. these wrappers, while simple, are undocumented in the schema and can be a source of confusion for team members and API consumers experiencing "hidden" behavior.
+Implementing a directive used to be a very tedious and confusing process. With the addition of the `graphql-tools` `SchemaVisitor` class a big leap in the direction of usability was made. Many authors opted for simpler alternatives like higher order function resolver wrappers. These wrappers, while simple, are undocumented in the schema and often require repetitive application and upkeep throughout the codebase.
 
-what are the benefits of using implementing proper directives vs using higher order resolver wrappers?
+What are the benefits of implementing directives vs using higher order resolver wrappers?
 
 - your directives are officially documented as part of the schema itself
-- every team member across the stack is aware of them
-- there is no "hidden" magic that may confuse your API's consumers
+- write its resolver once and use them any number of times by simply `@directive` tagging Types and Type Fields in your schema that you want to apply it to
+- no more concerns of forgetting to wrap a resolver leading to unexpected behavior
+- there is no "hidden" magic that requires digging throughout the resolvers to understand
 
-this library makes the process of implementing directives as simple as writing any other resolver in your Apollo Server. the heavy lifting has been abstracted even further (over the `graphql-tools` `SchemaVisitor` class) so that you only need to write your `directiveResolver` and the rest is taken care of! for those authors who are currently using higher order resolver wrappers transitioning to using actual directives is trivial.
+This library makes implementing directives as simple as writing any other resolver in your Apollo Server. For those authors who are currently using higher order resolver wrappers transitioning to using directives is trivial.
 
 # current support
 
-- currently supported directive targets:
+- directive targets (covers majority of use cases):
   - `OBJECT`: directives applied to `Type` definitions
-    - the directive is applied to all fields of the Object Type
+    - the directive is applied to all the fields of the Object Type it is tagged on
   - `FIELD_DEFINITION`: directives applied to `Type.field` definitions
-    - the directive is applied only to the specific Object Type Field
-    - note this includes `Query.queryName` and `Mutation.mutationName`
-    - `Query` and `Mutation` are considered Object Types
-- **each directive resolver must have a corresponding type definition in the schema**
-  - see the [schema directive type definitions and usage](#schema-directive-type-definitions-and-usage) section for notes and examples
+    - the directive is applied only to the specific Object Type Field it is tagged on
+    - note this includes `Query.queryName` and `Mutation.mutationName` because `Query` and `Mutation` are considered Object Types
+- directive arguments
 
 # usage
 
@@ -32,7 +33,7 @@ this library makes the process of implementing directives as simple as writing a
 $ npm install apollo-directive
 ```
 
-- once you have [written the directive type def](#schema-directive-type-definitions-and-usage) you can implement its resolver using the two package utilities: `createDirective` or `createSchemaDirectives`
+- once you have [written the directive type def](#schema-directive-type-definitions-and-usage) you can implement its resolver using one of the two package utilities: `createDirective` or `createSchemaDirectives`
 - both tools make use of a [`directiveConfig` object](#directive-config)
 
 ```js
@@ -45,25 +46,9 @@ const directiveConfig = {
 
 ## resolverReplacer and directiveResolver
 
-- the `resolverReplacer` and `directiveResolver` functions are used in a higher order function chain that returns a `resolvedValue`
-  - `resolverReplacer` -> `directiveResolver` -> `resolvedValue`
-- this sounds complicated but as seen below the implementation on your end is as intuitive as writing any other resolver
-  - think of the `directiveResolver` as a middleware for your resolvers
-  - it receives the original resolver's arguments and should return a resolved value
-- `resolverReplacer` is used to replace the original resolver with your `directiveResolver`
-  - used as a bridge between `apollo-directive` and your `directiveResolver`
-  - `resolverReplacer` brings the `originalResolver` and `directiveContext` parameters into the scope of your `directiveResolver`
-- the `directiveResolver` function receives the original field resolver's arguments
-  - `(root, args, context, info)`
-  - these can be abbreviated into an array as `(...resolverArgs)` to make using the `apply()` syntax easier (see below)
-- **the `directiveResolver` must be a function declaration not an arrow function**
-  - its declaration must be returned from the `resolverReplacer`
-
 ```js
-// this is the resolverReplacer function boilerplate
-// it should return a directiveResolver function declaration
 const resolverReplacer = (originalResolver, directiveContext) =>
-  /* async */ function directiveResolver(...resolverArgs) {
+  async function directiveResolver(...resolverArgs) {
     // implement your directive logic in here
 
     // use any of the original resolver arguments as needed by destructuring
@@ -90,9 +75,19 @@ const resolverReplacer = (originalResolver, directiveContext) =>
 
     // return a resolved value (this is what is sent back in the API response)
     return resolvedValue;
-  }
+  };
 ```
 
+- the `resolverReplacer` and `directiveResolver` functions are used in a higher order function chain that returns a `resolvedValue`
+  - `resolverReplacer` -> `directiveResolver` -> `resolvedValue`
+- this sounds complicated but as seen above the implementation on your end is as intuitive as writing any other resolver
+- `resolverReplacer` is used internally to replace the original resolver with your `directiveResolver`
+  - used as a bridge between `apollo-directive` and your `directiveResolver`
+  - brings the `originalResolver` and `directiveContext` parameters into the scope of your `directiveResolver`
+- the `directiveResolver` function receives the original field resolver's arguments
+  - `(root, args, context, info)`
+  - these can be abbreviated into an array as `(...resolverArgs)` to make using the `apply()` syntax easier (see below)
+- **the `directiveResolver` must be a function declaration not an arrow function**
 - executing the `originalResolver` must be done using the `apply` syntax
 
 ```js
@@ -108,10 +103,34 @@ result = await originalResolver.apply(this, resolverArgs);
 result = originalResolver.apply(this, [root, args, context, info]);
 ```
 
+- boilerplates to get going quickly
+
+```js
+// export the directiveConfig for use in createSchemaDirectives
+module.exports = {
+  name,
+  resolverReplacer: (originalResolver, directiveContext) =>
+    async function directiveResolver(...resolverArgs) {
+      // implement directive logic
+      // return the resolved value
+    },
+};
+
+// export the created directive ready to be put into serverConfig.schemaDirectives object
+module.exports = createDirective({
+  name,
+  resolverReplacer: (originalResolver, directiveContext) =>
+    async function directiveResolver(...resolverArgs) {
+      // implement directive logic
+      // return the resolved value
+    },
+});
+```
+
 ## using createDirective
 
 - use for creating a single directive resolver
-- add the resolver to the Apollo Server `directiveCschemaDirectives` object
+- add the resolver to the Apollo Server `serverConfig.schemaDirectives` object
   - **the name must match the `<directive name>` from the corresponding directive type definition in the schema**
 
 ```js
@@ -121,8 +140,8 @@ const { createDirective } = require("apollo-directives");
 // assumes @admin directive type def has been added to schema
 
 const adminDirectiveConfig = {
-  name: "admin", // @<name> from directive type def
-  resolverReplacer: requireAdminReplacer, // see resolverReplacer docs below
+  name: "admin",
+  resolverReplacer: requireAdminReplacer,
   hooks: { /* optional hooks */ }
 };
 
@@ -140,7 +159,7 @@ const server = new ApolloServer({
 
 ## using createSchemaDirectives
 
-- accepts an array of [directive config](#directive-config) objects
+- accepts an array of [directive config](#directive-config) objects in `config.directiveConfigs`
 - assign the result to `serverConfig.schemaDirectives` in the Apollo Server constructor
 - creates each directive and provides them as the schemaDirectives object in `{ name: directiveResolver, ... }` form
 
@@ -151,8 +170,8 @@ const { createSchemaDirectives } = require("apollo-directives");
 // assumes @admin directive type def has been added to schema
 
 const adminDirectiveConfig = {
-  name: "admin", // @<name> from directive type def
-  resolverReplacer: requireAdminReplacer, // see resolverReplacer docs below
+  name: "admin", // must match the name of the directive @<name>
+  resolverReplacer: requireAdminReplacer,
   hooks: { /* optional hooks */ }
 };
 
@@ -161,7 +180,9 @@ const server = new ApolloServer({
   ...
 
   // pass an array of directive config objects to create the schemaDirectives object
-  schemaDirectives: createSchemaDirectives([adminDirectiveConfig]),
+  schemaDirectives: createSchemaDirectives({
+    directiveConfigs: [adminDirectiveConfig],
+  }), // returns { name: directiveResolver, ... }
 });
 ```
 
@@ -189,25 +210,6 @@ const directiveConfig = {
 ```js
 resolverReplacer(originalResolver, directiveContext) ->
     directiveResolver(root, args, context, info) -> resolved value
-```
-
-- boilerplates to get started quickly
-  - most directive resolvers will need to use promises inside so these functions are `async`
-    - it is not required that the `directiveResolver` be async
-  - `resolverArgs` is an array of arguments to the original resolver `[root, args, context, info]`
-
-```js
-const resolverReplacer = (originalResolver, directiveContext) =>
-  async function directiveResolver(...resolverArgs) {
-    // implement directive logic
-    // return the resolved value
-  };
-
-module.exports = (originalResolver, directiveContext) =>
-  async function directiveResolver(...resolverArgs) {
-    // implement directive logic
-    // return the resolved value
-  };
 ```
 
 ### directiveContext
@@ -280,7 +282,7 @@ onVisitObject(directiveContext) -> void
 onvisitFieldDefinition(directiveContext) -> void
 ```
 
-## onApplyDirective
+### onApplyDirective
 
 - called immediately before the directive is applied
   - directive applied to an Object Type (`on OBJECT`): called once for each field in the Object
@@ -444,7 +446,7 @@ const upperCaseReplacer = (originalResolver, directiveContext) =>
   // the directiveResolver function
   async function upperCaseResolver(...resolverArgs) {
     // execute the original resolver to store its output for directive processing below
-    const result = await originalResolver.apply(this, args);
+    const result = await originalResolver.apply(this, resolverArgs);
 
     // return the a valid resolved value after directive processing
     if (typeof result === "string") {

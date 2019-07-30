@@ -3,7 +3,11 @@ const { defaultFieldResolver } = require("graphql");
 const { SchemaDirectiveVisitor } = require("graphql-tools");
 
 require("./jsdoc-types");
-const { validateDirectiveConfig } = require("./utils");
+const {
+  shouldApplyToField,
+  markDirectiveApplied,
+  validateDirectiveConfig,
+} = require("./utils");
 
 /**
  * @param {import('./jsdoc-types.js').DirectiveConfig} directiveConfig
@@ -16,32 +20,6 @@ const createDirective = (directiveConfig) => {
   } = validateDirectiveConfig(directiveConfig);
 
   return class ApolloDirective extends SchemaDirectiveVisitor {
-    static markDirectiveApplied(directiveTarget) {
-      if (!directiveTarget._appliedDirectives) {
-        directiveTarget._appliedDirectives = {};
-      }
-
-      directiveTarget._appliedDirectives[name] = true;
-    }
-
-    static shouldApplyToField(directiveTarget, fromApplyToObject = false) {
-      if (!directiveTarget._appliedDirectives) {
-        directiveTarget._appliedDirectives = {};
-      }
-
-      const directiveAlreadyApplied = directiveTarget._appliedDirectives[name];
-
-      // if the directive is being applied from applyToObject and it has already been applied
-      if (fromApplyToObject && directiveAlreadyApplied) {
-        // edge case where both the Object Type and its field have been tagged by the same directive
-        // with different directive args, give directive args precedence to field level args
-        // as it has a higher specificity than the more general object level args
-        return false;
-      }
-
-      return true;
-    }
-
     visitObject(objectType) {
       if (onVisitObject) {
         onVisitObject(this.createDirectiveContext(objectType));
@@ -69,10 +47,10 @@ const createDirective = (directiveConfig) => {
       };
     }
 
-    replaceFieldResolver(objectType, field, fromApplyToObject = false) {
+    replaceFieldResolver(objectType, field, applyingAtObjectLevel = false) {
       // if the directive has already been applied to the field exit early
       // prevents duplicate application of the directive
-      if (!ApolloDirective.shouldApplyToField(field, fromApplyToObject)) return;
+      if (!shouldApplyToField(field, name, applyingAtObjectLevel)) return;
 
       if (onApplyDirective) {
         onApplyDirective(this.createDirectiveContext(objectType, field));
@@ -86,7 +64,7 @@ const createDirective = (directiveConfig) => {
         this.createDirectiveContext(objectType, field),
       );
 
-      ApolloDirective.markDirectiveApplied(field);
+      markDirectiveApplied(field, name);
     }
 
     applyToObject(objectType) {
