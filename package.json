@@ -1,5 +1,5 @@
 {
-  "name": "apollo-directives",
+  "name": "apollo-directive",
   "version": "0.0.1",
   "description": "tools for simplifying the process of implementing schema directive resolvers with Apollo Server",
   "main": "src/index.js",
@@ -13,7 +13,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/the-vampiire/apollo-directives.git"
+    "url": "git+https://github.com/the-vampiire/apollo-directive.git"
   },
   "keywords": [
     "apollo",
@@ -25,9 +25,9 @@
   "author": "the-vampiire",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/the-vampiire/apollo-directives/issues"
+    "url": "https://github.com/the-vampiire/apollo-directive/issues"
   },
-  "homepage": "https://github.com/the-vampiire/apollo-directives#readme",
+  "homepage": "https://github.com/the-vampiire/apollo-directive#readme",
   "dependencies": {
     "graphql": "^14.4.2",
     "graphql-tools": "^4.0.5"
