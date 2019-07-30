@@ -33,7 +33,7 @@ const markDirectiveApplied = (directiveTarget, directiveName) => {
 const shouldApplyToField = (
   field,
   directiveName,
-  fromApplyToObject = false,
+  applyingAtObjectLevel = false,
 ) => {
   if (!field._appliedDirectives) {
     field._appliedDirectives = {};
@@ -42,7 +42,7 @@ const shouldApplyToField = (
   const directiveAlreadyApplied = field._appliedDirectives[directiveName];
 
   // if the directive is being applied from applyToObject and it has already been applied
-  if (fromApplyToObject && directiveAlreadyApplied) {
+  if (applyingAtObjectLevel && directiveAlreadyApplied) {
     /**
      * edge case where both the Object Type and its field have been tagged by the same directive
      * but each have different directive args
@@ -51,7 +51,7 @@ const shouldApplyToField = (
      *
      * an alternative if the order of visitX methods is ever changed
      * - markDirectiveApplied: cache the args (stringified) applied at the field level / object level
-     * - if fromApplyToObject && argsDontMatch: compare the args and return false if object args !== field args
+     * - if applyingAtObjectLevel && argsDontMatch: compare the args and return false if object args !== field args
      */
     return false;
   }

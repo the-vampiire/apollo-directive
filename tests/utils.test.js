@@ -7,32 +7,38 @@ const {
 } = require("../src/utils");
 
 describe("utility functions", () => {
-  describe("validateDirectiveConfig: throws an Error for missing or invalid required properties", () => {
+  describe("validateDirectiveConfig: ", () => {
     const directiveConfig = {
       name: "directiveName",
       resolverReplacer: () => {},
     };
 
-    [
-      {
-        message: "missing name",
-        config: { ...directiveConfig, name: undefined },
-      },
-      {
-        message: "missing resolverReplacer",
-        config: { ...directiveConfig, resolverReplacer: undefined },
-      },
-      {
-        message: "name is not a string",
-        config: { ...directiveConfig, name: 5 },
-      },
-      {
-        message: "resolverReplacer is not a function",
-        config: { ...directiveConfig, resolverReplacer: "not a func" },
-      },
-    ].forEach(testCase => test(testCase.message, () => {
-      expect(() => validateDirectiveConfig(testCase.config)).toThrow();
-    }));
+    test("valid directiveConfig: returns the directiveConfig", () => expect(validateDirectiveConfig(directiveConfig)).toEqual(
+      directiveConfig,
+    ));
+
+    describe("failure cases: throws an Error for missing or invalid required properties", () => {
+      [
+        {
+          message: "missing name",
+          config: { ...directiveConfig, name: undefined },
+        },
+        {
+          message: "missing resolverReplacer",
+          config: { ...directiveConfig, resolverReplacer: undefined },
+        },
+        {
+          message: "name is not a string",
+          config: { ...directiveConfig, name: 5 },
+        },
+        {
+          message: "resolverReplacer is not a function",
+          config: { ...directiveConfig, resolverReplacer: "not a func" },
+        },
+      ].forEach(testCase => test(testCase.message, () => {
+        expect(() => validateDirectiveConfig(testCase.config)).toThrow();
+      }));
+    });
   });
 
   describe("shouldApplyToField: checks if the directive should be applied to the field", () => {
