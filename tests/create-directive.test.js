@@ -7,9 +7,12 @@ const {
 } = require("../src/utils");
 
 jest.mock("../src/utils.js", () => ({
+  shouldApplyToField: jest.fn(),
+  markDirectiveApplied: jest.fn(),
   validateDirectiveConfig: jest.fn(config => config),
 }));
 
+/* eslint-disable no-param-reassign */
 const mockMethods = (directiveInstance, methodsToMock) => {
   Object.keys(methodsToMock).forEach((methodName) => {
     directiveInstance[methodName] = jest.fn();
@@ -22,15 +25,10 @@ const replaceMethods = (directiveInstance, originalMethods) => {
   });
 };
 
-const resolverReplacer = spies => (originalResolver, directiveContext) => function directiveResolver(...resolverArgs) {
-  spies.originalResolver(originalResolver);
-  spies.directiveContext(directiveContext);
-  spies.resolverArgs(resolverArgs);
-};
-
-const field = { name: "getPerson" };
+const resolverReplacer = jest.fn();
+const directiveName = "directiveName";
 const objectType = { name: "Query " };
-const directiveName = "fancyDirective";
+const field = { name: "getPerson", resolve: "original resolver" };
 const directiveArgs = { first: "first arg", second: ["second", "arg", "list"] };
 
 describe("core export: createDirective", () => {
@@ -55,6 +53,15 @@ describe("core export: createDirective", () => {
     expect(directiveInstance.constructor.name).toBe("ApolloDirective");
   });
 
+  it("can be used without providing hooks", () => {
+    const hooklessDirective = new (createDirective({
+      ...directiveConfig,
+      hooks: undefined,
+    }))({ name: directiveName, args: directiveArgs });
+
+    expect(hooklessDirective.constructor.name).toBe("ApolloDirective");
+  });
+
   describe("visitObject behavior", () => {
     const { applyToObject, createDirectiveContext } = directiveInstance;
 
@@ -63,12 +70,10 @@ describe("core export: createDirective", () => {
       mockMethods(directiveInstance, { applyToObject, createDirectiveContext });
       directiveInstance.visitObject(objectType);
     });
-    afterAll(() => {
-      replaceMethods(directiveInstance, {
-        applyToObject,
-        createDirectiveContext,
-      });
-    });
+    afterAll(() => replaceMethods(directiveInstance, {
+      applyToObject,
+      createDirectiveContext,
+    }));
 
     it("calls onVisitObject hook providing it the directiveContext with objectType", () => {
       expect(directiveInstance.createDirectiveContext).toHaveBeenCalledWith(
@@ -79,7 +84,7 @@ describe("core export: createDirective", () => {
       );
     });
 
-    it("applies the directive to the objectType object", () => expect(directiveInstance.applyToObject).toHaveBeenCalledWith(objectType));
+    it("requests the directive be applied to the objectType object", () => expect(directiveInstance.applyToObject).toHaveBeenCalledWith(objectType));
   });
 
   describe("visitFieldDefinition behavior", () => {
@@ -93,12 +98,10 @@ describe("core export: createDirective", () => {
       });
       directiveInstance.visitFieldDefinition(field, { objectType });
     });
-    afterAll(() => {
-      replaceMethods(directiveInstance, {
-        replaceFieldResolver,
-        createDirectiveContext,
-      });
-    });
+    afterAll(() => replaceMethods(directiveInstance, {
+      replaceFieldResolver,
+      createDirectiveContext,
+    }));
 
     it("calls onVisitFieldDefinition hook providing it the directiveContext with objectType and field", () => {
       expect(directiveInstance.createDirectiveContext).toHaveBeenCalledWith(
@@ -110,7 +113,7 @@ describe("core export: createDirective", () => {
       );
     });
 
-    it("replaces the field object's resolver", () => expect(directiveInstance.replaceFieldResolver).toHaveBeenCalledWith(
+    it("requests the directive be applied to the field object", () => expect(directiveInstance.replaceFieldResolver).toHaveBeenCalledWith(
       objectType,
       field,
     ));
@@ -150,17 +153,60 @@ describe("core export: createDirective", () => {
     });
     afterAll(() => replaceMethods(directiveInstance, { replaceFieldResolver }));
 
-    it("sets the replaceFieldResolver method flag to indicate an Object Type level application of the directive", () => expect(directiveInstance.replaceFieldResolver).toHaveBeenCalledWith(
+    // see utils.shouldApplyToField for notes
+    it("sets the replaceFieldResolver method flag indicating the directive application is occurring from the Object Type level", () => expect(directiveInstance.replaceFieldResolver).toHaveBeenCalledWith(
       mockObjectType,
       mockObjectFields.first,
       true,
     ));
 
-    it("replaces the resolver for each of the objectType's fields", () => {
+    it("requests the directive be applied for each of the objectType's fields", () => {
       const numFields = Object.keys(mockObjectFields).length;
       expect(directiveInstance.replaceFieldResolver).toHaveBeenCalledTimes(
         numFields,
       );
+    });
+  });
+
+  describe("replaceFieldResolver behavior", () => {
+    const { createDirectiveContext } = directiveInstance;
+    beforeAll(() => mockMethods(directiveInstance, { createDirectiveContext }));
+    afterAll(() => replaceMethods(directiveInstance, { createDirectiveContext }));
+
+    describe("when the directive has already been applied to the field and is being reapplied from  the Object Type level", () => {
+      it("exits early", () => {
+        shouldApplyToField.mockImplementationOnce(() => false);
+        directiveInstance.replaceFieldResolver(objectType, field, true);
+        expect(markDirectiveApplied).not.toHaveBeenCalled();
+      });
+    });
+
+    describe("when the directive should be applied to the field", () => {
+      let originalResolver;
+      beforeAll(() => {
+        originalResolver = field.resolve;
+        shouldApplyToField.mockImplementationOnce(() => true);
+        directiveInstance.replaceFieldResolver(objectType, field);
+      });
+
+      it("calls onApplyDirective hook providing it the directiveContext with objectType and field", () => {
+        expect(directiveInstance.createDirectiveContext).toHaveBeenCalledWith(
+          objectType,
+          field,
+        );
+        expect(directiveConfig.hooks.onApplyDirective).toHaveBeenCalledWith(
+          directiveInstance.createDirectiveContext(),
+        );
+      });
+
+      it("replaces the field's original resolver using the resolverReplacer providing it the originalResolver and directiveContext", () => {
+        expect(resolverReplacer).toHaveBeenCalledWith(
+          originalResolver,
+          directiveInstance.createDirectiveContext(),
+        );
+      });
+
+      it("marks the field as having the directive applied", () => expect(markDirectiveApplied).toHaveBeenCalled());
     });
   });
 });

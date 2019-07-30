@@ -47,10 +47,10 @@ const createDirective = (directiveConfig) => {
       };
     }
 
-    replaceFieldResolver(objectType, field, fromApplyToObject = false) {
+    replaceFieldResolver(objectType, field, applyingAtObjectLevel = false) {
       // if the directive has already been applied to the field exit early
       // prevents duplicate application of the directive
-      if (!shouldApplyToField(field, name, fromApplyToObject)) return;
+      if (!shouldApplyToField(field, name, applyingAtObjectLevel)) return;
 
       if (onApplyDirective) {
         onApplyDirective(this.createDirectiveContext(objectType, field));
