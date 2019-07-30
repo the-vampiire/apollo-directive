@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/the-vampiire/apollo-directive.svg?branch=master)](https://travis-ci.org/the-vampiire/apollo-directive) [![Coverage Status](https://coveralls.io/repos/github/the-vampiire/apollo-directive/badge.svg)](https://coveralls.io/github/the-vampiire/apollo-directive)
+[![Build Status](https://travis-ci.org/the-vampiire/apollo-directive.svg?branch=master)](https://travis-ci.org/the-vampiire/apollo-directive) [![Coverage Status](https://coveralls.io/repos/github/the-vampiire/apollo-directive/badge.svg)](https://coveralls.io/github/the-vampiire/apollo-directive) [![NPM Package](https://img.shields.io/npm/v/apollo-directive.svg?label=NPM:%20apollo-directive)](https://npmjs.org/apollo-directive)
 
 This library aims to resolve this quote, and commonly shared opinion, from the [Schema Directives docs](https://www.apollographql.com/docs/graphql-tools/schema-directives/#using-schema-directives):
 
@@ -6,7 +6,7 @@ This library aims to resolve this quote, and commonly shared opinion, from the [
 
 # concept
 
-Implementing a directive used to be a very tedious and confusing process. With the addition of the `graphql-tools` `SchemaVisitor` class a big leap in the direction of usability was made. Many authors opted for simpler alternatives like higher order function resolver wrappers. These wrappers, while simple, are undocumented in the schema and often require repetitive application and upkeep throughout the codebase.
+Implementing a directive used to be a very tedious and confusing process. With the addition of the `graphql-tools` `SchemaVisitor` class a big leap in the direction of usability was made. But there was still a lot of uncertainty about how it could be used. Many authors opted for simpler alternatives like higher order function resolver wrappers that behaved like directives. These wrappers, while simple, are undocumented in the schema and often require repetitive application and upkeep throughout the codebase.
 
 What are the benefits of implementing directives vs using higher order resolver wrappers?
 
