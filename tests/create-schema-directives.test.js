@@ -1,6 +1,6 @@
 const { createSchemaDirectives } = require("../src");
-
 const createDirective = require("../src/create-directive");
+
 jest.mock("../src/create-directive.js");
 
 describe("core export: createSchemaDirectives", () => {

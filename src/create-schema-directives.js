@@ -10,13 +10,12 @@ const createDirective = require("./create-directive");
  * @param {{ directiveConfigs: [DirectiveConfig] }} config
  * @returns {Object} schemaDirectives
  */
-const createSchemaDirectives = config =>
-  config.directiveConfigs.reduce(
-    (schemaDirectives, directiveConfig) => ({
-      ...schemaDirectives,
-      [directiveConfig.name]: createDirective(directiveConfig),
-    }),
-    {},
-  );
+const createSchemaDirectives = config => config.directiveConfigs.reduce(
+  (schemaDirectives, directiveConfig) => ({
+    ...schemaDirectives,
+    [directiveConfig.name]: createDirective(directiveConfig),
+  }),
+  {},
+);
 
 module.exports = createSchemaDirectives;
