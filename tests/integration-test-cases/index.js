@@ -1,9 +1,7 @@
-const onObject = require("./on-object");
-const onCombined = require("./on-combined");
-const onFieldDefinition = require("./on-field-definition");
+const auth = require("./auth");
+const upperCase = require("./upper-case");
 
 module.exports = {
-  onObject,
-  onCombined,
-  onFieldDefinition,
+  auth,
+  upperCase,
 };
