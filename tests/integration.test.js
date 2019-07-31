@@ -1,6 +1,9 @@
 const { graphql } = require("graphql");
-
-const { auth, upperCase } = require("./integration-test-cases");
+const {
+  auth,
+  upperCase,
+  multipleDirectives,
+} = require("./integration-test-cases");
 
 const runQueryTest = (schema, testCase) => {
   const {
@@ -59,14 +62,21 @@ describe("integration tests: applying schema directives and executing live queri
       testCases.forEach(testCase => runQueryTest(schema, testCase));
     });
 
-    // describe("on OBJECT | FIELD_DEFINITION: @auth (default args) on Person, @auth(require: [SELF]) on Query.getMessages", () => {
-    //   const { schema, testCases } = onCombined;
-    //   testCases.forEach(testCase => runQueryTest(schema, testCase));
-    // });
+    describe("on OBJECT | FIELD_DEFINITION: @auth (default [ADMIN]) on Person, @auth(require: [SELF]) on Query.getMessages", () => {
+      const { schema, testCases } = onCombined;
+      testCases.forEach(testCase => runQueryTest(schema, testCase));
+    });
 
-    // describe("on OBJECT | FIELD_DEFINITION with conflicting args: @auth(require: [USER]) on Person, @auth(require: [SELF, ADMIN]) on Person.email", () => {
-    //   const { schema, testCases } = withConflictingArgs;
-    //   testCases.forEach(testCase => runQueryTest(schema, testCase));
-    // });
+    describe("with conflicting args: @auth(require: [ADMIN, SELF]) on Person, @auth(require: [SELF]) on Person.age", () => {
+      const { schema, testCases } = withConflictingArgs;
+      testCases.forEach(testCase => runQueryTest(schema, testCase));
+    });
+  });
+
+  describe("multiple directives and locations using createSchemaDirectives", () => {
+    describe("@auth on Person, @upperCase on Person.name, @auth(require: [SELF]) @upperCase on Query.getMessages", () => {
+      const { schema, testCases } = multipleDirectives;
+      testCases.forEach(testCase => runQueryTest(schema, testCase));
+    });
   });
 });
