@@ -11,6 +11,11 @@ const resolverReplacer = (originalResolver, directiveContext) => async function 
   return originalResolver.apply(this, args);
 };
 
+const directiveConfig = {
+  name: "auth",
+  resolverReplacer,
+};
+
 const typeDef = directiveTarget => `
   directive @auth(require: [Role] = [ADMIN]) on ${directiveTarget}
 
@@ -23,8 +28,6 @@ const typeDef = directiveTarget => `
 
 module.exports = {
   typeDef,
-  auth: createDirective({
-    name: "auth",
-    resolverReplacer,
-  }),
+  directiveConfig,
+  auth: createDirective(directiveConfig),
 };
