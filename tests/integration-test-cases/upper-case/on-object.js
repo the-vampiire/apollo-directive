@@ -1,5 +1,5 @@
 const { makeExecutableSchema } = require("graphql-tools");
-const { upperCase } = require("./directives");
+const { upperCase } = require("./directive");
 
 const typeDefs = `
   directive @upperCase on OBJECT

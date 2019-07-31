@@ -1,4 +1,4 @@
-const { createDirective } = require("../../src");
+const { createDirective } = require("../../../src");
 
 const upperCase = createDirective({
   name: "upperCase",
