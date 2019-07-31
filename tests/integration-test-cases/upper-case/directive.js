@@ -1,13 +1,19 @@
 const { createDirective } = require("../../../src");
 
-const upperCase = createDirective({
+const upperCaseIfString = value => (typeof value === "string" ? value.toUpperCase() : value);
+
+const directiveConfig = {
   name: "upperCase",
-  resolverReplacer: originalResolver => function upperCaseResolver(...args) {
-    const result = originalResolver.apply(this, args);
-    return typeof result === "string" ? result.toUpperCase() : result;
+  resolverReplacer: originalResolver => async function upperCaseResolver(...args) {
+    const result = await originalResolver.apply(this, args);
+    if (Array.isArray(result)) {
+      return result.map(upperCaseIfString);
+    }
+    return upperCaseIfString(result);
   },
-});
+};
 
 module.exports = {
-  upperCase,
+  directiveConfig,
+  upperCase: createDirective(directiveConfig),
 };
