@@ -1,6 +1,6 @@
 {
   "name": "apollo-directive",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "tools for simplifying the process of implementing schema directive resolvers with Apollo Server",
   "main": "src/index.js",
   "directories": {
