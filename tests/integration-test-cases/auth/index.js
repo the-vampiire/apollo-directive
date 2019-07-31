@@ -1,11 +1,11 @@
 const onObject = require("./on-object");
-// const onCombined = require("./on-combined");
+const onCombined = require("./on-combined");
 const onFieldDefinition = require("./on-field-definition");
-// const withConflictingArgs = require("./with-conflicting-args");
+const withConflictingArgs = require("./with-conflicting-args");
 
 module.exports = {
   onObject,
-  // onCombined,
+  onCombined,
   onFieldDefinition,
-  // withConflictingArgs,
+  withConflictingArgs,
 };
