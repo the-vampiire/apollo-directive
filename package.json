@@ -1,6 +1,6 @@
 {
   "name": "apollo-directive",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "tools for simplifying the process of implementing custom GraphQL schema directives in Apollo Server",
   "main": "src/index.js",
   "directories": {
