@@ -1,7 +1,7 @@
 {
   "name": "apollo-directive",
   "version": "0.1.1",
-  "description": "tools for simplifying the process of implementing schema directive resolvers with Apollo Server",
+  "description": "tools for simplifying the process of implementing custom GraphQL schema directives in Apollo Server",
   "main": "src/index.js",
   "directories": {
     "test": "tests"
@@ -9,6 +9,7 @@
   "scripts": {
     "test": "jest",
     "lint": "eslint .",
+    "test:integration": "npm test -- -t integration --verbose",
     "test:travis": "npm run test -- --no-cache --coverage && cat ./coverage/lcov.info | coveralls"
   },
   "repository": {
@@ -17,6 +18,7 @@
   },
   "keywords": [
     "apollo",
+    "custom",
     "directives",
     "graphql",
     "server",
