@@ -1,17 +1,19 @@
 [![Build Status](https://travis-ci.org/the-vampiire/apollo-directive.svg?branch=master)](https://travis-ci.org/the-vampiire/apollo-directive) [![Coverage Status](https://coveralls.io/repos/github/the-vampiire/apollo-directive/badge.svg)](https://coveralls.io/github/the-vampiire/apollo-directive) [![NPM Package](https://img.shields.io/npm/v/apollo-directive.svg?label=NPM:%20apollo-directive)](https://npmjs.org/apollo-directive)
 
+### Finally an easy way to create custom GraphQL directives! With this package creating a custom schema directive is as easy as writing any other Apollo resolver.
+
 This library aims to resolve this quote, and commonly shared opinion, from the [Schema Directives docs](https://www.apollographql.com/docs/graphql-tools/schema-directives/#using-schema-directives):
 
 > ...some of the examples may seem quite complicated. No matter how many tools and best practices you have at your disposal, it can be difficult to implement a non-trivial schema directive in a reliable, reusable way.
 
 # concept
 
-Implementing a directive used to be a very tedious and confusing process. With the addition of the `graphql-tools` `SchemaVisitor` class a big leap in the direction of usability was made. But there was still a lot of uncertainty about how it could be used. Many authors opted for simpler alternatives like higher order function resolver wrappers that behaved like directives. These wrappers, while simple, are undocumented in the schema and often require repetitive application and upkeep throughout the codebase.
+Implementing a custom schema directive used to be a very tedious and confusing process. With the addition of the `graphql-tools` `SchemaVisitor` class a big leap in the direction of usability was made. But there was still a lot of uncertainty about how it could be used, especially for beginners to GraphQL. Many authors opted for simpler alternatives like higher order function resolver wrappers that behaved like directives. These wrappers, while simple, are undocumented in the schema and often require repetitive application and upkeep throughout the codebase.
 
 What are the benefits of implementing directives vs using higher order resolver wrappers?
 
 - your directives are officially documented as part of the schema itself
-- write its resolver once and use them any number of times by simply `@directive` tagging Types and Type Fields in your schema that you want to apply it to
+- write its resolver once and use it any number of times by simply `@directive` tagging Types and Type Fields in your schema that you want to apply it to
 - no more concerns of forgetting to wrap a resolver leading to unexpected behavior
 - there is no "hidden" magic that requires digging throughout the resolvers to understand
 
@@ -19,13 +21,22 @@ This library makes implementing directives as simple as writing any other resolv
 
 # current support
 
-- directive targets (covers majority of use cases):
+- directive targets (covers the vast majority of use cases):
   - `OBJECT`: directives applied to `Type` definitions
     - the directive is applied to all the fields of the Object Type it is tagged on
   - `FIELD_DEFINITION`: directives applied to `Type.field` definitions
     - the directive is applied only to the specific Object Type Field it is tagged on
     - note this includes `Query.queryName` and `Mutation.mutationName` because `Query` and `Mutation` are considered Object Types
 - directive arguments
+- unit and integration tests are available in the `tests/` directory. the integration tests also serve as example implementations and can be run with
+
+```sh
+# all tests
+$ npm test
+
+# integration tests
+$ npm run test:integration
+```
 
 # usage
 
@@ -489,6 +500,13 @@ const {
 const {
   name,
   type,
+  args: [{
+    name,
+    type,
+    description,
+    defaultValue,
+    astNode,
+  }, ...],
   description,
   isDeprecated,
   deprecationReason,
